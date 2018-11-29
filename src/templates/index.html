@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Task Scheduler Dashboard</title>
+  <!-- Bootstrap -->
+  <link href="{{ url_for('static',filename='vendor/bootstrap-3.3.6-dist/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename='vendor/bootstrap-3.3.6-dist/js/bootstrap.min.js') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename='css/default.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename='css/css-loader.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static',filename='vendor/font-awesome-4.6.3/css/font-awesome.min.css') }}" rel="stylesheet">
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="{{ url_for('static',filename='vendor/jquery.min.js') }}"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="{{ url_for('static',filename='js/default.js') }}"></script>
+</head>
+
+<body>
+  <div class="container-fluid display-table">
+    <div class="row display-table-row">
+      <div class="col-md-3 col-sm-2 display-table-cell" id="info">
+        <div id="info-flex-container">
+            <!-- <div class="item"> -->
+          <div class="dash-panel-dark item">
+            <div class="row btm-border">
+              <div class="info-panel-title-brick info-panel-title-brick-active" id="info_panel_tutorial_tab">
+                  <i class="glyphicon glyphicon-info-sign" aria-hidden="true"></i><span class="info-panel-title-txt">Tutorial:</span>
+              </div>
+              <div class="info-panel-title-brick" id="info_panel_apis_tab">
+                  <i class="glyphicon glyphicon-cog" aria-hidden="true"></i><span class="info-panel-title-txt">APIs:</span>
+              </div>
+            </div>
+            <div id="info_panel_tutorial">
+              <p>A tool to visually run and manage a scheduler instance and jobs imported from uploaded python files on your computer.<br>
+                <code>How to Use:</code><br>
+                <code>1.</code> Check scheduler status to make sure it's running, otherwise START it.<br>
+                <code>2.</code> Upload .py file containing a job method you want to run. Files with same name will be overwritten.
+                   Your .py file may or may not contain a class. Multiple files can only be uploaded one by one or manually put under jobs folder on server.<br>
+                <code>3.</code> Add a job to run immediately by specifying all necessary input values. pyClassName is not mandatory if you don't have a class in code. <br>
+                   Example: inside JobExampleClass.py, we have a method printParameters(p1, p2) defined in class JobExampleClass, and it prints the value of p1 and p2. 
+                   So pyFileName is JobExampleClass.py, pyClassName is JobExampleClass, pyMethodName is printParameters and pyParameter is <b>'value1','value2'</b><br>
+                <code>4.</code> A job is paused and resumed immediately even if it is still running.
+              </p>
+            </div>
+            <div id="info_panel_apis">
+                  <div class="row request-row">
+                    <div class="col-md-4 request-name">host</div>
+                    <div class="col-md-8 request-info">localhost:8888</div>
+                  </div>
+                  <div class="row request-row">
+                    <div class="col-md-4 request-name">start, pause, resume, stop scheduler</div>
+                    <div class="col-md-8 request-info"><code>GET:</code> host/job/{op}Scheduler (like pauseScheduler)</div>
+                  </div>
+                  <div class="row request-row">
+                    <div class="col-md-4 request-name">scheduler status</div>
+                    <div class="col-md-8 request-info"><code>GET:</code> host/job/getSchedulerStatus</div>
+                  </div>
+                  <div class="row request-row">
+                    <div class="col-md-4 request-name">all jobs' info</div>
+                    <div class="col-md-8 request-info"><code>GET:</code> host/job/showAllJobInfo</div>
+                  </div>
+                  <div class="row request-row">
+                    <div class="col-md-4 request-name">add a job</div>
+                    <div class="col-md-8 request-info">
+                        <span><code>POST:</code> host/job/addJob </span>
+                        <span><code>PAYLOAD:</code> {"jobId":"jobId1","interval_sec":5,"pyFileName":"JobExampleClass","pyClassName":"JobExampleClass","pyMethodName":"printSomething","pyParameter":"'aaa','bbb'"}</span>
+                    </div>
+                  </div>
+                  <div class="row request-row">
+                    <div class="col-md-4 request-name">remove, pause, resume a job</div>
+                    <div class="col-md-8 request-info">
+                      <span><code>POST:</code> host/job/{op}Job  (like resumeJob)</span>
+                      <span><code>PAYLOAD:</code> {"jobId":"jobId1"}</span>
+                    </div>
+                  </div>
+            </div>
+          </div>
+          <div class="dash-panel-dark item">
+            <div class="row btm-border">
+              <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>
+              <span class="info-panel-title-txt">Server Response:</span>
+              <span class="glyphicon glyphicon-trash pull-right" title="clear messages" id="clearServerMessage"></span>
+            </div>
+            <div class="row" id="server_message_row">
+              <p id="server_message"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9 col-sm-10 display-table-cell valign-top" id="content">
+        <div class="row">
+          <header id="nav-header" class="clearfix">
+            <div class="col-md-5 nav-header">
+              <input type="text" class="hidden-sm hidden-xs" id="header-search-field" placeholder="">
+            </div>
+            <div class="col-md-7">
+              <ul class="pull-right">
+                <li id="welcome" class="hidden-xs">Welcome to Scheduler Dashboard</li>
+                <li class="fix-width">
+                  <a href="#">
+                    <span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
+                    <span class="label label-warning">0</span>
+                  </a>
+                </li>
+                <li class="fix-width">
+                  <a href="#">
+                    <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                    <span class="label label-message">0</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="logout">
+                    <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+                    Log Out
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </header>
+        </div>
+        <div class="row content-row">
+          <div id="status-panel" class="dash-panel-with-header">
+            <div class="prj-panel-header">
+              <h5 id="schedulerStatus">Scheduler Status: <span class='text-info'>Unknown</span></h5>
+              <div class="tool-bar pull-right">
+                <a class="collapse-link">
+                  <i class="fa fa-minus-square-o" data-toggle="collapse" data-target="#status-panel_content"></i>
+                </a>
+              </div>
+            </div>
+            <div id="status-panel_content" class="collapse in panel-content row">
+              <div class="col-md-6">
+                  <div class="status-item-title"><h6>Manage the Scheduler:</h6></div>
+                  <div class="status-item-content">
+                      <button type="button" class="btn btn-primary btn-xs" id="scheduler_btn_start">Start</button>
+                      <button type="button" class="btn btn-success btn-xs" id="scheduler_btn_resume">Resume</button>
+                      <button type="button" class="btn btn-warning btn-xs" id="scheduler_btn_pause">Pause</button>
+                      <button type="button" class="btn btn-danger btn-xs" id="scheduler_btn_stop">Stop</button>
+                  </div>
+              </div>
+              <div class="col-md-6">
+                  <div class="status-item-title"><h6>Resource in Use:</h6></div>
+                  <div class="status-item-content">
+                    <div class="resource-item">
+                        <img class="media-object" src="{{ url_for('static',filename='images/cpu.png') }}" alt="...">
+                        <span id="cpu_info" class="badge badge-info">CPU: 0%</span>
+                    </div>
+                    <div class="resource-item">
+                        <img class="media-object" src="{{ url_for('static',filename='images/ram.png') }}" alt="...">
+                        <span id="mem_info" class="badge badge-info">Memory: 0%</span>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row content-row">
+            <div id="add-job-panel" class="dash-panel-with-header">
+              <div class="prj-panel-header">
+                <h5>Add A Job or Manage Job Files: </h5>
+                <div class="tool-bar pull-right">
+                  <a class="collapse-link">
+                    <i class="fa fa-minus-square-o" data-toggle="collapse" data-target="#status-panel_content"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-7 add-job-form-container">
+                    <form>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label for="jobId" class="col-sm-4 col-form-label">jobId</label>
+                              <div class="col-sm-8">
+                                <input type="text" class="form-control input-sm" id="jobId" name="jobId" placeholder="any unique id">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label for="interval_sec" class="col-sm-4 col-form-label">interval(sec)</label>
+                              <div class="col-sm-8">
+                                <input type="text" class="form-control input-sm" id="interval_sec" name="interval_sec" placeholder="interval in sec">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label for="pyFileName" class="col-sm-4 col-form-label">pyFileName</label>
+                              <div class="col-sm-8">
+                                <input type="text" class="form-control input-sm" id="pyFileName" name="pyFileName" placeholder="uploaded python file name">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                              <div class="form-group row">
+                                <label for="pyClassName" class="col-sm-4 col-form-label">pyClassName</label>
+                                <div class="col-sm-8">
+                                  <input type="text" class="form-control input-sm" id="pyClassName" name="pyClassName" placeholder="your python class name">
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group row">
+                              <label for="pyMethodName" class="col-sm-4 col-form-label">pyMethodName</label>
+                              <div class="col-sm-8">
+                                <input type="text" class="form-control input-sm" id="pyMethodName" name="pyMethodName" placeholder="your method name">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                              <div class="form-group row">
+                                <label for="pyParameter" class="col-sm-4 col-form-label">pyParameter</label>
+                                <div class="col-sm-8">
+                                  <input type="text" class="form-control input-sm" id="pyParameter" name="pyParameter" placeholder="like 'para1','para2'">
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <button type="button" id="addJobBtn" class="btn btn-primary btn-xs pull-right">Add Job</button>
+                        </div>
+                      </form>
+                </div>
+                <div class="col-md-5">
+                    <div class="job-file-container">
+                        <br>
+                        <div class="row" id="file-upload-container">
+                            <div class="title"><input id="uploadFileText" type="text" disabled="disabled" placeholder="No File Selected"></div>
+                            <div class="fileUpload btn btn-info btn-xs btn-height">
+                                <span>choose a .py file</span>
+                                <input type="file" class="upload" id="pythonFile" name="pythonFile" accept="*" />
+                            </div>
+                            <div><button type="button" id="submitFileBtn" class="btn btn-primary btn-xs btn-height">Upload</button></div>
+                        </div>
+                        <div class="uploadedFilesContainer">
+                          <table class="table">
+                            <thead class="thead-light">
+                              <tr>
+                                <th scope="col" width="70%">Uploaded Files:</th>
+                                <th scope="col" width="30%">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody id="fileTableTbody">
+                            </tbody>
+                          </table>
+                        </div>
+                    </div>
+
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="row content-row" id="lower-content">
+            <div id="jobs-panel" class="dash-panel-with-header">
+              <div class="prj-panel-header">
+                <h5>Running Jobs:</h5>
+              </div>
+              <div id="jobs-panel_content" class="collapse in">
+                <table class="table">
+                  <thead class="thead-light">
+                    <tr>
+                      <th scope="col" width="10%">Job Id</th>
+                      <th scope="col" width="25%">Name</th>
+                      <th scope="col" width="12%">Executor</th>
+                      <th scope="col" width="15%">Max Instances</th>
+                      <th scope="col" width="15%">Next Run Time</th>
+                      <th scope="col" width="23%">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="jobTableTbody">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:25px">
+          <footer id="admin-footer" class="clearfix">
+            <div class="pull-left"><b>Scheduler Dashboard </b>@ Created by Feng Liang</div>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="spinner" class="loader loader-bar" data-text="Processing..." data-blink></div>
+</body>
+
+</html>
