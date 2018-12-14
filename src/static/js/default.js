@@ -53,14 +53,14 @@ function stopSpinner() {
 function bindFormSubmit() {
     $("#addJobBtn").click(function () {
         // var form = $('form')[0];
-        if ((!$("#jobId").val()) || (!$("#interval_sec").val()) || (!$("#pyMethodName").val()) || (!$("#pyFileName").val())) {
-            updateServerException('You must input jobId, interval_sec, pyMethodName, pyFileName');
+        if ((!$("#jobId").val()) || (!$("#crontab_exp").val()) || (!$("#pyMethodName").val()) || (!$("#pyFileName").val())) {
+            updateServerException('You must input jobId, crontab_exp, pyMethodName, pyFileName');
             return false;
         }
         startSpinner();
         var formdata = new FormData();
         formdata.append("jobId", $("#jobId").val());
-        formdata.append("interval_sec", $("#interval_sec").val());
+        formdata.append("crontab_exp", $("#crontab_exp").val());
         formdata.append("pyMethodName", $("#pyMethodName").val());
         formdata.append("pyClassName", $("#pyClassName").val());
         formdata.append("pyFileName", $("#pyFileName").val());
@@ -291,6 +291,14 @@ function bindFileLoadBtn() {
     });
 }
 
+
+function checkAndClearServerMsg(){
+    //automatically remove all messages if they go beyond 50
+    if ($("#server_message > small").length > 50){
+        $("#server_message").html("")
+    }
+}
+
 $(function () {
     //button actions for scheduler
     bindSchedulerBtn('start');
@@ -313,7 +321,7 @@ $(function () {
         getCPUandMemStatus();
         getAllJobs();
         getAllJobFiles();
-        // getPausedJobIds();
+        checkAndClearServerMsg();
     }, 3000);
 });
 

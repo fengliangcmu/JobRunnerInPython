@@ -9,6 +9,7 @@ import sys
 import datetime
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from importlib import import_module
 import psutil
 
@@ -16,7 +17,6 @@ app = Flask(__name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(APP_ROOT, 'jobs'))
 my_scheduler = None
-# pausedJobIds = []
 
 def getResultJson():
     res = {
@@ -136,7 +136,7 @@ def resumeScheduler():
 
 
 #payload should be including tag info
-#{"jobId":"jobId1","interval_sec":5,"pyFileName":"JobExampleClass","pyClassName":"JobExampleClass","pyMethodName":"printSomething","pyParameter":"'aaa','bbb'"}
+#{"jobId":"jobId1","crontab_exp":5,"pyFileName":"JobExampleClass","pyClassName":"JobExampleClass","pyMethodName":"printSomething","pyParameter":"'aaa','bbb'"}
 @app.route('/job/addJob', methods=['POST'])
 def addJob():
     global my_scheduler
@@ -146,13 +146,14 @@ def addJob():
     else:
         if my_scheduler.state == 1:
             jobId = request.form['jobId']
-            interval_sec = request.form['interval_sec']
+            crontab_exp = request.form['crontab_exp']
             pyClassName = request.form['pyClassName'] 
             pyMethodName = request.form['pyMethodName']
             pyFileName = request.form['pyFileName']
             pyParameter = request.form['pyParameter']
             targetFolder = os.path.join(APP_ROOT, 'jobs')
             destination = "/".join([targetFolder, pyFileName])
+            # sched.add_job(job_function, CronTrigger.from_crontab('0 0 1-15 may-aug *'))
             if os.path.isfile(destination):
                 result = pyFileName.split ('.')
                 module_local = import_module(result[0])
@@ -161,7 +162,8 @@ def addJob():
                     eval_str = eval_str + pyClassName + '.' + pyMethodName
                 else:
                     eval_str = eval_str + pyMethodName
-                eval_str = eval_str + ', \'interval\', seconds=' + str(interval_sec) +', id=\'' + jobId + '\''
+                #eval_str = eval_str + ', \'interval\', seconds=' + str(crontab_exp) +', id=\'' + jobId + '\''
+                eval_str = eval_str + ', CronTrigger.from_crontab(\'' + crontab_exp +'\'), id=\'' + jobId + '\''
                 if pyParameter.strip():
                     eval_str = eval_str + ',args=['+ pyParameter.strip() + ']'
                 eval_str = eval_str + ')'

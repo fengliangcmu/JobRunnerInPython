@@ -43,7 +43,8 @@
                 <code>3.</code> Add a job to run immediately by specifying all necessary input values. pyClassName is not mandatory if you don't have a class in code. <br>
                    Example: inside JobExampleClass.py, we have a method printParameters(p1, p2) defined in class JobExampleClass, and it prints the value of p1 and p2. 
                    So pyFileName is JobExampleClass.py, pyClassName is JobExampleClass, pyMethodName is printParameters and pyParameter is <b>'value1','value2'</b><br>
-                <code>4.</code> A job is paused and resumed immediately even if it is still running.
+                <code>4.</code> A job is paused and resumed immediately even if it is still running.<br>
+                <code>5.</code> Server Response panel refreshes if there are more than 50 messages.
               </p>
             </div>
             <div id="info_panel_apis">
@@ -67,7 +68,7 @@
                     <div class="col-md-4 request-name">add a job</div>
                     <div class="col-md-8 request-info">
                         <span><code>POST:</code> host/job/addJob </span>
-                        <span><code>PAYLOAD:</code> {"jobId":"jobId1","interval_sec":5,"pyFileName":"JobExampleClass","pyClassName":"JobExampleClass","pyMethodName":"printSomething","pyParameter":"'aaa','bbb'"}</span>
+                        <span><code>PAYLOAD:</code> {"jobId":"jobId1","crontab_exp":"* * * * *","pyFileName":"JobExampleClass","pyClassName":"JobExampleClass","pyMethodName":"printSomething","pyParameter":"'aaa','bbb'"}</span>
                     </div>
                   </div>
                   <div class="row request-row">
@@ -182,9 +183,9 @@
                           </div>
                           <div class="col-md-6">
                             <div class="form-group row">
-                              <label for="interval_sec" class="col-sm-4 col-form-label">interval(sec)</label>
+                              <label for="crontab_exp" class="col-sm-4 col-form-label">crontab_expression</label>
                               <div class="col-sm-8">
-                                <input type="text" class="form-control input-sm" id="interval_sec" name="interval_sec" placeholder="interval in sec">
+                                <input type="text" class="form-control input-sm" id="crontab_exp" name="crontab_exp" placeholder="five fields like: * * * * *">
                               </div>
                             </div>
                           </div>
