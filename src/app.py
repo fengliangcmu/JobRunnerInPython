@@ -251,7 +251,8 @@ def showAllJobInfo():
                 if x is not None:
                     temp_time = ''
                     if x.next_run_time:
-                        temp_time = x.next_run_time.isoformat(' ', 'seconds')
+                        #temp_time = x.next_run_time.isoformat(' ', 'seconds')
+                        temp_time = x.next_run_time.strftime('%Y/%m/%d/%H:%M:%S')
                     tempObj = {
                         "id":x.id,
                         "name":x.name,
