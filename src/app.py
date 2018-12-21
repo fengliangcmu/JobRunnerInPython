@@ -12,8 +12,16 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from importlib import import_module
 import psutil
+import logging
 
 app = Flask(__name__)
+log = logging.getLogger('werkzeug')
+# don't need normal access logs
+# more cases for logs: http://flask.pocoo.org/docs/dev/logging/ 
+log.setLevel(logging.ERROR) 
+# don't need normal access logs
+# more cases for logs: http://flask.pocoo.org/docs/dev/logging/ 
+
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(APP_ROOT, 'jobs'))
 my_scheduler = None
@@ -225,17 +233,6 @@ def resumeJob():
         res = handleSuccess('Job:'+ json_re['jobId'] +' is resumed!', None)
     return json.dumps(res), 200, {'ContentType':'application/json'} 
 
-# # get paused job Ids
-# @app.route('/job/getPausedJobIds', methods=['GET'])
-# def getPausedJobIds():
-#     global my_scheduler
-#     res = None
-#     if my_scheduler is None:
-#         res = handleError('No scheduler is running!')
-#     else:
-#         res = handleSuccess('', pausedJobIds)
-#     return json.dumps(res), 200, {'ContentType':'application/json'} 
-
 # show all job info
 @app.route('/job/showAllJobInfo', methods=['GET'])
 def showAllJobInfo():
@@ -325,6 +322,7 @@ def handle_error(e):
 
 if __name__ == '__main__':
     #app.run()
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(debug=True, host='0.0.0.0',port=8888)
+    # app.jinja_env.auto_reload = True
+    # app.config['TEMPLATES_AUTO_RELOAD'] = True
+    # app.run(debug=True, host='0.0.0.0',port=8888)
+    app.run(host='0.0.0.0',port=8888)
